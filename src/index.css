@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* Rain animation */
+@keyframes rainDrop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(105vh);
+    opacity: 0;
+  }
+}
+
+.animate-rain {
+  animation-name: rainDrop;
+  animation-timing-function: linear;
+}
+
+/* Atmospheric dynamic backgrounds */
+.bg-atmosphere-sunny {
+  background: radial-gradient(circle at 10% 20%, rgba(254, 243, 199, 0.8) 0%, rgba(240, 249, 255, 0.7) 90%);
+}
+
+.bg-atmosphere-cloudy {
+  background: radial-gradient(circle at 50% 10%, rgba(224, 242, 254, 0.8) 0%, rgba(241, 245, 249, 0.9) 100%);
+}
+
+.bg-atmosphere-rainy {
+  background: radial-gradient(circle at 80% 20%, rgba(219, 234, 254, 0.85) 0%, rgba(226, 232, 240, 0.85) 100%);
+}
+
+.bg-atmosphere-sunset {
+  background: radial-gradient(circle at 50% 20%, rgba(254, 215, 170, 0.8) 0%, rgba(254, 205, 211, 0.7) 50%, rgba(241, 245, 249, 0.9) 100%);
+}
+
+.bg-atmosphere-night {
+  background: radial-gradient(circle at 50% 20%, rgba(30, 41, 59, 0.08) 0%, rgba(241, 245, 249, 0.9) 100%);
+}
+
+/* Glass Card styling */
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.glass-card-subtle {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Smooth Card Hover Interactions */
+.card-hover {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+}
+
+.btn-press {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+/* Modern Minimalist Scrollbar */
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
