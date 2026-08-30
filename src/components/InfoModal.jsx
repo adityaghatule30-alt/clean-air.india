@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { 
   X, ShieldCheck, FileText, Info, Mail, Database, 
-  Sparkles, ExternalLink, CheckCircle2, AlertTriangle, Send, Lock
+  Sparkles, ExternalLink, CheckCircle2, AlertTriangle, Send, Lock, Loader2
 } from 'lucide-react';
+import { submitContactForm } from '../api/contactApi';
 
 export default function InfoModal({ isOpen, onClose, initialTab = 'about' }) {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [contactSubmitted, setContactSubmitted] = useState(false);
-  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', subject: 'Feedback' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '', topic: 'Feedback' });
 
   if (!isOpen) return null;
 
@@ -19,13 +22,21 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about' }) {
     { id: 'contact', label: 'Contact', icon: Mail }
   ];
 
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
-    setContactSubmitted(true);
-    setTimeout(() => {
-      setContactSubmitted(false);
-      setContactForm({ name: '', email: '', message: '', subject: 'Feedback' });
-    }, 4000);
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      await submitContactForm(contactForm);
+      setContactSubmitted(true);
+      setContactForm({ name: '', email: '', message: '', topic: 'Feedback' });
+    } catch (err) {
+      console.error("Contact form error:", err);
+      setSubmitError(err.message || 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -314,21 +325,35 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about' }) {
                   </div>
                   <h4 className="text-base font-black text-emerald-900">Message Received! 🎉</h4>
                   <p className="text-xs text-emerald-800 font-semibold">
-                    Thank you for supporting CleanAir India. We review all community feedback and local banter suggestions!
+                    Thank you for reaching out to CleanAir India. An email notification has been dispatched to our support inbox!
                   </p>
+                  <button
+                    onClick={() => setContactSubmitted(false)}
+                    className="mt-2 text-xs font-black text-emerald-700 underline cursor-pointer"
+                  >
+                    Send another message
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleContactSubmit} className="space-y-3.5 text-xs font-bold">
+                  {submitError && (
+                    <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 flex items-center gap-2 animate-fadeIn">
+                      <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-slate-700 mb-1 font-black">Your Name</label>
                       <input
                         type="text"
                         required
+                        disabled={isSubmitting}
                         value={contactForm.name}
                         onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
                         placeholder="e.g. Aditya"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-xs font-semibold"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-xs font-semibold disabled:opacity-60"
                       />
                     </div>
                     <div>
@@ -336,10 +361,11 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about' }) {
                       <input
                         type="email"
                         required
+                        disabled={isSubmitting}
                         value={contactForm.email}
                         onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
                         placeholder="aditya@example.com"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-xs font-semibold"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-xs font-semibold disabled:opacity-60"
                       />
                     </div>
                   </div>
@@ -347,9 +373,10 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about' }) {
                   <div>
                     <label className="block text-slate-700 mb-1 font-black">Topic</label>
                     <select
-                      value={contactForm.subject}
-                      onChange={(e) => setContactForm({ ...contactForm, subject: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-xs font-semibold"
+                      disabled={isSubmitting}
+                      value={contactForm.topic}
+                      onChange={(e) => setContactForm({ ...contactForm, topic: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-xs font-semibold disabled:opacity-60"
                     >
                       <option value="Feedback">General Feedback</option>
                       <option value="City Joke Suggestion">Suggest a Local City Joke / Banter</option>
@@ -363,19 +390,30 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about' }) {
                     <textarea
                       rows={4}
                       required
+                      disabled={isSubmitting}
                       value={contactForm.message}
                       onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
                       placeholder="Tell us what you love, what needs fixing, or suggest a new Indian city for the leaderboard!"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-xs font-semibold resize-none"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 text-xs font-semibold resize-none disabled:opacity-60"
                     ></textarea>
                   </div>
 
                   <button
                     type="submit"
-                    className="btn-press w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-black text-xs px-5 py-3 rounded-xl shadow-soft-sm flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    disabled={isSubmitting}
+                    className="btn-press w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-black text-xs px-5 py-3 rounded-xl shadow-soft-sm flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-60"
                   >
-                    <Send className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Send Message</span>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 text-amber-400 animate-spin" />
+                        <span>Sending Message...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Send Message</span>
+                      </>
+                    )}
                   </button>
                 </form>
               )}
