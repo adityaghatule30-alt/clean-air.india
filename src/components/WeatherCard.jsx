@@ -29,7 +29,7 @@ export default function WeatherCard({ weatherData, aqiData, currentCity, onMetri
   };
 
   const weatherInfo = interpretWeatherCode(current.weatherCode);
-  const roastInfo = getWeatherRoast(weatherData);
+  const roastInfo = getWeatherRoast(weatherData, aqiData, currentCity);
   const micro = getMicroSnippets(weatherData);
   const cityJudgment = getCityJudgment(cityName, weatherData, aqiData);
   const localWeatherBanter = getLocalBanter(currentCity, weatherData, aqiData, 'weather');

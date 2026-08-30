@@ -1,8 +1,9 @@
 // CleanAir India - Exhaustive Personality, Roast & Atmosphere Humor Engine
-// Powered by Anti-Repetition Ring Buffer & Multi-Condition Combination Engine
+// Powered by Anti-Repetition Ring Buffer, Multi-Condition Combination Engine & WeatherCommentaryEngine
 
 import { antiRepetition } from './antiRepetitionEngine.js';
 import { HUMOR_DATABASE } from './humorDatabase.js';
+import { weatherCommentary } from './weatherCommentaryEngine.js';
 
 export const getRandomItem = (arr, categoryKey = 'general') => {
   if (!arr || arr.length === 0) return '';
@@ -98,167 +99,86 @@ export const getCityJudgment = (cityName, weather, aqi) => {
     return getRandomItem([
       `${name} IS PREHEATED TO 200°C 🔥`,
       `The sun has a personal vendetta against ${name}.`,
-      `${name}: outside is currently an air fryer.`,
-      `${name} asphalt is ready for cooking breakfast.`
-    ], `judgment_extreme_heat_${name}`);
+      `Hot pavement and air conditioning prayers in ${name}.`,
+      `${name} detected: heatwave boss fight in progress.`
+    ], `judgment_hot_${name}`);
   }
   if (temp <= 12) {
     return getRandomItem([
-      `${name} has enabled Arctic DLC ❄️`,
-      `${name} is in maximum blanket burrito mode.`,
-      `Chilly breeze taking over ${name} streets.`
+      `${name} IS FREEZING BRISK 🥶`,
+      `Chai and blanket protocol mandatory in ${name}.`,
+      `Winter has cornered ${name} completely.`
     ], `judgment_cold_${name}`);
   }
-
   return getRandomItem([
-    `Atmospheric reality check for ${name} 📡`,
-    `Live weather & lung conditions in ${name} 📍`,
-    `What the sky is doing over ${name} right now ☁️`,
-    `Satellite telemetry report for ${name} ✨`
-  ], `judgment_normal_${name}`);
+    `Atmosphere report for ${name} 📍`,
+    `${name} weather is currently doing things.`,
+    `Telemetry synced for ${name} 🌤️`,
+    `Today's atmospheric vibe in ${name}:`
+  ], `judgment_general_${name}`);
 };
 
-// 🌡️ Weather Roasts (Dynamic Combo aware)
-export const getWeatherRoast = (weatherData, aqiData) => {
-  const current = weatherData?.current || {};
-  const temp = Math.round(current.temperature ?? 26);
-  const humidity = Math.round(current.humidity ?? 50);
-  const wind = Math.round(current.windSpeed ?? 10);
-  const code = Number(current.weatherCode ?? 0);
-  const aqiVal = Math.round(aqiData?.aqi ?? 50);
-
-  // Combination Checks
-  if (temp >= 33 && humidity >= 75) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.combos.heat_and_humidity, 'combo_heat_humidity'),
-      tempNote: "Sauna protocol: maximum moisture and heat.",
-      vibeTag: "Atmospheric Soup 🥟"
-    };
-  }
-
-  if (temp >= 33 && aqiVal >= 150) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.combos.heat_and_bad_aqi, 'combo_heat_aqi'),
-      tempNote: "Double trouble: hot sun & spicy smog.",
-      vibeTag: "Smoked Barbecue 💀"
-    };
-  }
-
-  if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code) && wind >= 25) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.combos.rain_and_wind, 'combo_rain_wind'),
-      tempNote: "Rain with strong wind: umbrella danger zone.",
-      vibeTag: "Umbrella Doom ☔"
-    };
-  }
-
-  if (temp >= 20 && temp <= 27 && aqiVal <= 45) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.combos.perfect_and_clean, 'combo_perfect'),
-      tempNote: "Rare atmospheric W: clean air and crisp temp.",
-      vibeTag: "10/10 Heaven ✨"
-    };
-  }
-
-  // Pure Temperature Fallbacks
-  if (temp >= 40) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.temperature.extreme_heat, 'temp_extreme_heat'),
-      tempNote: "Extreme Heat Warning: stay hydrated indoors.",
-      vibeTag: "Air Fryer 🔥"
-    };
-  }
-  if (temp >= 35) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.temperature.very_hot, 'temp_very_hot'),
-      tempNote: "High Heat: AC on full blast recommended.",
-      vibeTag: "Toasty AF 🥵"
-    };
-  }
-  if (temp <= 9) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.temperature.freezing, 'temp_freezing'),
-      tempNote: "Freezing Cold: bundle up immediately.",
-      vibeTag: "Arctic Mode 🥶"
-    };
-  }
-  if (temp <= 18) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.temperature.chilly, 'temp_chilly'),
-      tempNote: "Chilly breeze: sweater weather active.",
-      vibeTag: "Hoodie Season 🧥"
-    };
-  }
-
+// 🌡️ Weather Roasts (Dynamic Multi-Condition & Telemetry Aware)
+export const getWeatherRoast = (weatherData, aqiData, currentCity) => {
+  const summary = weatherCommentary.getAtmosphereSummary(weatherData, aqiData, currentCity);
   return {
-    roast: getRandomItem(HUMOR_DATABASE.temperature.pleasant, 'temp_pleasant'),
-    tempNote: "Comfortable conditions across the area.",
-    vibeTag: "Chill Vibes 😎"
+    roast: summary.roast,
+    tempNote: summary.subtext,
+    vibeTag: summary.badge,
+    title: summary.title,
+    emoji: summary.emoji,
+    severity: summary.severity
   };
 };
 
 // 🫁 AQI Roasts
 export const getAQIRoast = (aqi) => {
+  const res = weatherCommentary.getAQICommentary(aqi);
   const val = Math.round(Number(aqi) || 50);
-
-  if (val <= 50) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.aqi.good, 'aqi_good'),
-      comment: "Pristine oxygen purity. Breathe freely.",
-      badge: "Pure Oxygen 🌿"
-    };
-  }
-  if (val <= 100) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.aqi.moderate, 'aqi_moderate'),
-      comment: "Acceptable urban air. Standard operations.",
-      badge: "Moderate Air 🌤️"
-    };
-  }
-  if (val <= 149) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.aqi.sensitive, 'aqi_sensitive'),
-      comment: "Mild particulate texture detected.",
-      badge: "Slightly Spicy 🌶️"
-    };
-  }
-  if (val <= 249) {
-    return {
-      roast: getRandomItem(HUMOR_DATABASE.aqi.unhealthy, 'aqi_unhealthy'),
-      comment: "N95 mask strongly advised for outdoor trips.",
-      badge: "Textured Air 💀"
-    };
-  }
+  let comment = "Air quality is normal.";
+  if (val <= 50) comment = "Pristine oxygen purity. Breathe freely! 🌿";
+  else if (val <= 100) comment = "Acceptable urban air. Lungs operating nominally.";
+  else if (val <= 150) comment = "Mild particulate texture detected. Sensitive groups beware.";
+  else if (val <= 200) comment = "N95 mask recommended for outdoor activity.";
+  else if (val <= 300) comment = "Spicy atmospheric smog. Limit outdoor exposure.";
+  else comment = "🚨 Health Alert: Serious hazardous particulate pollution.";
 
   return {
-    roast: getRandomItem(HUMOR_DATABASE.aqi.hazardous, 'aqi_hazardous'),
-    comment: "Bunker mode: turn air purifiers to maximum power.",
-    badge: "Biohazard Level ☠️"
+    roast: res.roast,
+    comment,
+    badge: res.label
   };
 };
 
 // 👆 Interactive Click Commentary
 export const getClickRoast = (type, weather, aqi) => {
-  const temp = Math.round(weather?.current?.temperature ?? 28);
+  const current = weather?.current || {};
+  const temp = Math.round(current.temperature ?? 28);
+  const apparent = Math.round(current.apparentTemp ?? temp);
+  const humidity = Math.round(current.humidity ?? 50);
+  const wind = Math.round(current.windSpeed ?? 10);
+  const uv = Number(current.uvIndex ?? 0);
   const aqiVal = Math.round(aqi?.aqi ?? 55);
 
   if (type === 'temp') {
-    if (temp >= 35) return getRandomItem(HUMOR_DATABASE.temperature.very_hot, 'click_temp_hot');
-    if (temp <= 12) return getRandomItem(HUMOR_DATABASE.temperature.freezing, 'click_temp_cold');
-    return getRandomItem(HUMOR_DATABASE.temperature.pleasant, 'click_temp_pleasant');
+    return weatherCommentary.getFeelsLikeExplanation(temp, apparent, humidity, wind);
   }
 
   if (type === 'aqi') {
-    if (aqiVal >= 150) return getRandomItem(HUMOR_DATABASE.aqi.unhealthy, 'click_aqi_bad');
-    return getRandomItem(HUMOR_DATABASE.aqi.good, 'click_aqi_good');
+    const res = weatherCommentary.getAQICommentary(aqiVal);
+    return res.roast;
   }
 
   if (type === 'humidity') {
-    return getRandomItem(HUMOR_DATABASE.sky.humidity, 'click_humidity');
+    return weatherCommentary.getHumidityCommentary(humidity);
   }
 
   if (type === 'wind') {
-    return getRandomItem(HUMOR_DATABASE.sky.wind, 'click_wind');
+    return weatherCommentary.getWindCommentary(wind);
+  }
+
+  if (type === 'uv') {
+    return weatherCommentary.getUVCommentary(uv);
   }
 
   return "Atmospheric reality verified! 📡";
@@ -266,79 +186,69 @@ export const getClickRoast = (type, weather, aqi) => {
 
 // 🚶 Should I Go Out? Decision Engine
 export const getShouldIGoOut = (weatherData, aqiData) => {
-  const temp = Math.round(weatherData?.current?.temperature ?? 26);
+  const current = weatherData?.current || {};
+  const temp = Math.round(current.temperature ?? 26);
   const aqiVal = Math.round(aqiData?.aqi ?? 50);
-  const code = Number(weatherData?.current?.weatherCode ?? 0);
-  const isRain = [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(code);
+  const code = Number(current.weatherCode ?? 0);
+  const precipitation = Number(current.precipitation ?? 0);
+  const isRain = precipitation > 0.2 || [51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(code);
 
-  if (aqiVal >= 200) {
+  if (aqiVal >= 250) {
     return {
       status: "NO — STAY HOME 💀",
-      color: "bg-rose-500 text-white",
-      reason: `AQI is ${aqiVal}. Your lungs will thank you for staying indoors.`,
+      color: "bg-rose-600 text-white font-black shadow-soft-sm",
+      reason: `Hazardous AQI (${aqiVal}). Limit all outdoor cardio and stay indoors.`,
       emoji: "😷"
     };
   }
-  if (temp >= 38) {
+  if (temp >= 40) {
     return {
-      status: "NO — OVEN OUTSIDE 🔥",
-      color: "bg-orange-500 text-white",
-      reason: `${temp}°C detected. The sun is in aggressive interrogation mode.`,
+      status: "NO — AIR FRYER 🔥",
+      color: "bg-orange-600 text-white font-black shadow-soft-sm",
+      reason: `${temp}°C detected. Severe heat exhaustion risk; stay in shade/AC.`,
       emoji: "🫠"
     };
   }
   if (isRain) {
     return {
       status: "TACTICAL ONLY ☔",
-      color: "bg-blue-500 text-white",
-      reason: "Rain active. Deploy umbrella and waterproof shoes before leaving.",
+      color: "bg-blue-600 text-white font-black shadow-soft-sm",
+      reason: "Monsoon showers active. Waterproof boots and umbrella required.",
       emoji: "🌧️"
     };
   }
-  if (aqiVal <= 50 && temp >= 20 && temp <= 29) {
+  if (aqiVal <= 50 && temp >= 18 && temp <= 27) {
     return {
       status: "YES — PERFECT DAY 🎉",
-      color: "bg-emerald-500 text-slate-950 font-black",
+      color: "bg-emerald-500 text-slate-950 font-black shadow-soft-sm",
       reason: `Temp ${temp}°C and clean AQI ${aqiVal}. Touch grass authorized!`,
       emoji: "😎"
+    };
+  }
+  if (temp <= 8) {
+    return {
+      status: "BUNDLE UP 🥶",
+      color: "bg-cyan-600 text-white font-black shadow-soft-sm",
+      reason: `${temp}°C arctic breeze. Thermal layers and jacket mandatory.`,
+      emoji: "🧥"
     };
   }
 
   return {
     status: "YES — ALL CLEAR 👍",
-    color: "bg-emerald-500/20 text-emerald-800 border border-emerald-300 font-bold",
-    reason: "Conditions are normal and safe for everyday activities.",
+    color: "bg-emerald-100 text-emerald-900 border border-emerald-300 font-black",
+    reason: "Atmosphere is behaving within standard comfortable parameters.",
     emoji: "🚶"
   };
 };
 
 // Today's Vibe helper
-export const getTodaysVibe = (weatherData, aqiData) => {
-  const roast = getWeatherRoast(weatherData, aqiData);
+export const getTodaysVibe = (weatherData, aqiData, currentCity) => {
+  const roast = getWeatherRoast(weatherData, aqiData, currentCity);
   return {
     title: roast.roast,
-    emoji: roast.vibeTag.split(' ').pop() || '✨',
+    emoji: roast.emoji || '✨',
     tag: roast.vibeTag
-  };
-};
-
-// Roast Scale helper
-export const getRoastScale = (weatherData, aqiData) => {
-  const temp = Math.round(weatherData?.current?.temperature ?? 26);
-  let currentTier = 2;
-  if (temp >= 38) currentTier = 4;
-  else if (temp >= 32) currentTier = 3;
-  else if (temp <= 12) currentTier = 0;
-
-  return {
-    currentTier,
-    tiers: [
-      { id: 'frozen', title: 'Frozen', emoji: '🥶', color: 'bg-blue-500', barColor: 'bg-blue-600', explanation: 'Arctic conditions detected.' },
-      { id: 'chilly', title: 'Chilly', emoji: '🧥', color: 'bg-sky-500', barColor: 'bg-sky-600', explanation: 'Sweater weather active.' },
-      { id: 'chill', title: 'Chill', emoji: '😎', color: 'bg-emerald-500', barColor: 'bg-emerald-600', explanation: 'Pleasant atmospheric state.' },
-      { id: 'toasty', title: 'Toasty', emoji: '🥵', color: 'bg-amber-500', barColor: 'bg-amber-600', explanation: 'High heat warning.' },
-      { id: 'volcano', title: 'Volcanic', emoji: '💀', color: 'bg-rose-500', barColor: 'bg-rose-600', explanation: 'Industrial air fryer mode.' }
-    ]
   };
 };
 
@@ -347,9 +257,11 @@ export const getMicroSnippets = (weatherData) => {
   const current = weatherData?.current || {};
   const humidity = Math.round(current.humidity ?? 50);
   const wind = Math.round(current.windSpeed ?? 10);
+  const uv = Number(current.uvIndex ?? 0);
 
   return {
-    humidityNote: humidity >= 75 ? "Heavy moisture in the air" : humidity <= 35 ? "Dry air" : "Comfortable moisture",
-    windNote: wind >= 25 ? "Breezy / gusty" : wind <= 8 ? "Calm breeze" : "Gentle wind"
+    humidityNote: humidity >= 75 ? "Heavy moisture (sweat alert)" : humidity <= 35 ? "Dry air (hydrate!)" : "Balanced moisture",
+    windNote: wind >= 25 ? "Gusty wind (umbrella alert)" : wind <= 8 ? "Calm breeze" : "Gentle cooling breeze",
+    uvNote: uv >= 8 ? "Extreme UV (SPF 50+)" : uv >= 6 ? "High UV (sunglasses)" : "Low / safe UV"
   };
 };

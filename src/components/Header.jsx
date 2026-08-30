@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, RefreshCw, Volume2, VolumeX, ShieldAlert, MapPin, Star, ChevronDown, Compass, MessageSquare, Trophy, Gamepad2 } from 'lucide-react';
-import { getTimeBasedGreeting, HEADER_TAGLINES, getRandomItem, getClickRoast } from '../utils/personalityEngine';
+import { 
+  Sparkles, RefreshCw, Volume2, VolumeX, 
+  MapPin, Star, ChevronDown, MessageSquare, Trophy, 
+  Gamepad2, Share2, Swords, Skull, Smile, HelpCircle
+} from 'lucide-react';
+import { getTimeBasedGreeting, HEADER_TAGLINES, getRandomItem } from '../utils/personalityEngine';
 import { getLocalBanter } from '../utils/localBanterEngine';
 import { isFavoriteLocation, toggleFavoriteLocation } from '../utils/locationStorage';
 import { getUserProfile } from '../utils/achievementEngine';
+import { weatherCommentary } from '../utils/weatherCommentaryEngine';
 import confetti from 'canvas-confetti';
 
 export default function Header({ 
@@ -18,7 +23,11 @@ export default function Header({
   onOpenLocationPicker,
   onOpenAchievements,
   onOpenGame,
-  onEasterEgg 
+  onOpenWhy,
+  onShareCity,
+  onEasterEgg,
+  humorMode = 'sarcastic',
+  onChangeHumorMode
 }) {
   const [tagline, setTagline] = useState(HEADER_TAGLINES[0]);
   const [logoClickCount, setLogoClickCount] = useState(0);
@@ -42,7 +51,7 @@ export default function Header({
       try {
         confetti({ particleCount: 50, spread: 90, origin: { y: 0.3 } });
       } catch (e) {}
-      if (onEasterEgg) onEasterEgg("You clicked the logo 7 times. You have too much free time. Respect. 🏆");
+      if (onEasterEgg) onEasterEgg("You clicked the logo 7 times. Cosmic Meteorologist Easter Egg unlocked! 🏆");
       setLogoClickCount(0);
     }
   };
@@ -56,6 +65,12 @@ export default function Header({
       try {
         confetti({ particleCount: 20, spread: 50, origin: { y: 0.2 } });
       } catch (err) {}
+    }
+  };
+
+  const handleHumorClick = (mode) => {
+    if (onChangeHumorMode) {
+      onChangeHumorMode(mode);
     }
   };
 
@@ -74,10 +89,43 @@ export default function Header({
             {tagline}
           </span>
 
-          {/* Local Cultural Banter Speech Pill */}
-          <div className="inline-flex items-center gap-1.5 bg-slate-900 text-amber-300 px-3 py-1 rounded-full text-xs font-extrabold shadow-soft-sm border border-slate-700 animate-fadeIn">
-            <MessageSquare className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-            <span className="truncate max-w-[280px] sm:max-w-md">{localBanter.text}</span>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Humor Mode Intensity Selector */}
+            <div className="inline-flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-[10px] font-black">
+              <button
+                onClick={() => handleHumorClick('light')}
+                className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                  humorMode === 'light' ? 'bg-white text-slate-900 shadow-soft-sm font-black' : 'text-slate-500 hover:text-slate-800'
+                }`}
+                title="Light Mode: Gentle & wholesome banter"
+              >
+                🙂 Light
+              </button>
+              <button
+                onClick={() => handleHumorClick('sarcastic')}
+                className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                  humorMode === 'sarcastic' ? 'bg-white text-slate-900 shadow-soft-sm font-black' : 'text-slate-500 hover:text-slate-800'
+                }`}
+                title="Sarcastic Mode: Classic witty banter (Default)"
+              >
+                😏 Sarcastic
+              </button>
+              <button
+                onClick={() => handleHumorClick('dark')}
+                className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                  humorMode === 'dark' ? 'bg-slate-900 text-amber-300 shadow-soft-sm font-black' : 'text-slate-500 hover:text-slate-800'
+                }`}
+                title="Dark Mode: Deadpan & slightly unhinged internet humor"
+              >
+                💀 Dark
+              </button>
+            </div>
+
+            {/* Local Cultural Banter Speech Pill */}
+            <div className="inline-flex items-center gap-1.5 bg-slate-900 text-amber-300 px-3 py-1 rounded-full text-xs font-extrabold shadow-soft-sm border border-slate-700 animate-fadeIn">
+              <MessageSquare className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span className="truncate max-w-[200px] sm:max-w-xs">{localBanter.text}</span>
+            </div>
           </div>
         </div>
 
@@ -102,7 +150,7 @@ export default function Header({
                 <button
                   onClick={onOpenLocationPicker}
                   className="btn-press inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-amber-300 px-3 py-1 rounded-full text-xs font-black shadow-soft-sm cursor-pointer transition-all border border-slate-700"
-                  title="Click to switch location / browse cities"
+                  title="Click to switch location / search globally"
                 >
                   <MapPin className="w-3.5 h-3.5 text-amber-400" />
                   <span>{[currentCity?.name, currentCity?.admin1, currentCity?.country].filter(Boolean).slice(0, 2).join(', ') || 'Select Location'}</span>
@@ -121,12 +169,33 @@ export default function Header({
                 >
                   <Star className={`w-3.5 h-3.5 ${isFav ? 'fill-amber-400 text-amber-500' : ''}`} />
                 </button>
+
+                {/* 1-Click Share Button */}
+                <button
+                  onClick={onShareCity}
+                  className="btn-press p-1.5 rounded-full border bg-white/90 hover:bg-slate-100 text-slate-600 border-slate-200 shadow-soft-sm cursor-pointer transition-all"
+                  title="Share this city's weather & air quality forecast"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-indigo-600" />
+                </button>
               </div>
             </div>
           </div>
 
           {/* Action Toolbar */}
           <div className="flex items-center gap-2 self-stretch md:self-auto justify-end flex-wrap">
+            {/* Why Button */}
+            {onOpenWhy && (
+              <button
+                onClick={() => onOpenWhy('temperature')}
+                className="btn-press bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-black text-xs sm:text-sm px-3.5 py-2.5 rounded-2xl border border-indigo-200 shadow-soft-sm flex items-center gap-1.5 transition-all cursor-pointer"
+                title="Understand why atmospheric conditions are occurring"
+              >
+                <HelpCircle className="w-4 h-4 text-indigo-600" />
+                <span>Why? 🧠</span>
+              </button>
+            )}
+
             {/* Trophy Room / Achievements Button */}
             <button
               onClick={onOpenAchievements}
@@ -141,10 +210,10 @@ export default function Header({
             <button
               onClick={onOpenGame}
               className="btn-press bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-black text-xs sm:text-sm px-3.5 py-2.5 rounded-2xl border border-emerald-200 shadow-soft-sm flex items-center gap-1.5 transition-all cursor-pointer"
-              title="Play 'Should I Go Out?' Mini-Game"
+              title="Play 'Hotter or Not?' City Duel Mini-Game"
             >
               <Gamepad2 className="w-4 h-4 text-emerald-600" />
-              <span>Mini-Game 🎮</span>
+              <span>Hotter or Not? 🔥</span>
             </button>
 
             {/* City Duel */}
@@ -153,8 +222,8 @@ export default function Header({
               className="btn-press bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-black text-xs sm:text-sm px-3.5 py-2.5 rounded-2xl border border-indigo-200 shadow-soft-sm flex items-center gap-1.5 transition-all cursor-pointer"
               title="Compare 2 Cities in an Atmosphere Duel"
             >
-              <ShieldAlert className="w-4 h-4 text-indigo-600" />
-              <span>Smog Clash ⚔️</span>
+              <Swords className="w-4 h-4 text-indigo-600" />
+              <span>City Battle ⚔️</span>
             </button>
 
             {/* Sound FX Toggle (OFF by default) */}
@@ -178,7 +247,7 @@ export default function Header({
               className="btn-press bg-white hover:bg-slate-50 text-slate-800 font-black text-xs sm:text-sm px-4 py-2.5 rounded-2xl border border-slate-200 shadow-soft-sm flex items-center gap-1.5 transition-all disabled:opacity-50 cursor-pointer"
               title="Ask the clouds for fresh numbers"
             >
-              <RefreshCw className={`w-4 h-4 text-slate-700 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-slate-700 ${isRefreshing ? 'animate-spin text-amber-500' : ''}`} />
               <span className="hidden sm:inline">Ask Clouds 🔄</span>
             </button>
           </div>

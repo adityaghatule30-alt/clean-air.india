@@ -135,6 +135,118 @@ export const AQI_LEVELS = {
   }
 };
 
+export const US_EPA_AQI_TIERS = [
+  {
+    id: 'good',
+    min: 0,
+    max: 50,
+    label: 'Good',
+    shortLabel: '0 Good',
+    badge: 'Good (0–50)',
+    color: 'bg-emerald-500',
+    colorHex: '#10b981',
+    textColor: 'text-emerald-700',
+    bgLight: 'bg-emerald-50',
+    border: 'border-emerald-200',
+    description: 'Air quality is considered satisfactory, and air pollution poses little or no risk.',
+    funToast: 'Your lungs are having a peaceful day. 🌿'
+  },
+  {
+    id: 'moderate',
+    min: 51,
+    max: 100,
+    label: 'Moderate',
+    shortLabel: '50 Moderate',
+    badge: 'Moderate (51–100)',
+    color: 'bg-amber-400',
+    colorHex: '#f59e0b',
+    textColor: 'text-amber-800',
+    bgLight: 'bg-amber-50',
+    border: 'border-amber-200',
+    description: 'Air quality is acceptable; however, some pollutants may cause moderate concern for sensitive individuals.',
+    funToast: "Not perfect. Not panic-worthy. We're vibing. 😌"
+  },
+  {
+    id: 'sensitive',
+    min: 101,
+    max: 150,
+    label: 'Sensitive',
+    shortLabel: '100 Sensitive',
+    badge: 'Sensitive (101–150)',
+    color: 'bg-orange-500',
+    colorHex: '#f97316',
+    textColor: 'text-orange-800',
+    bgLight: 'bg-orange-50',
+    border: 'border-orange-200',
+    description: 'Members of sensitive groups may experience health effects. The general public is not likely to be affected.',
+    funToast: 'Maybe give prolonged outdoor cardio a second thought. 😬'
+  },
+  {
+    id: 'unhealthy',
+    min: 151,
+    max: 200,
+    label: 'Unhealthy',
+    shortLabel: '150 Unhealthy',
+    badge: 'Unhealthy (151–200)',
+    color: 'bg-rose-500',
+    colorHex: '#ef4444',
+    textColor: 'text-rose-800',
+    bgLight: 'bg-rose-50',
+    border: 'border-rose-200',
+    description: 'Everyone may begin to experience health effects; sensitive groups may experience more serious effects. Wear an N95 outdoors.',
+    funToast: 'Your lungs would like to file a formal complaint. 😷'
+  },
+  {
+    id: 'very_unhealthy',
+    min: 201,
+    max: 300,
+    label: 'Very Unhealthy',
+    shortLabel: '200 Very Unh',
+    badge: 'Very Unhealthy (201–300)',
+    color: 'bg-purple-600',
+    colorHex: '#8b5cf6',
+    textColor: 'text-purple-900',
+    bgLight: 'bg-purple-50',
+    border: 'border-purple-200',
+    description: 'Health alert: The risk of health effects is increased for everyone. Limit outdoor activity.',
+    funToast: 'Your lungs would like to unsubscribe from the atmosphere. 💀'
+  },
+  {
+    id: 'hazardous',
+    min: 301,
+    max: 500,
+    label: 'Hazardous',
+    shortLabel: '300+ Haz',
+    badge: 'Hazardous (301–500)',
+    color: 'bg-rose-950',
+    colorHex: '#881337',
+    textColor: 'text-rose-950',
+    bgLight: 'bg-rose-100',
+    border: 'border-rose-300',
+    description: 'Health warning of emergency conditions: everyone is more likely to be affected. Stay indoors.',
+    funToast: 'Yeah... today is 100% an indoor day. ☠️'
+  }
+];
+
+export function calculateAqiPositionPercent(aqi) {
+  if (aqi == null || isNaN(aqi)) return null;
+  const val = Math.max(0, Math.min(500, Number(aqi)));
+  
+  if (val <= 50) {
+    return (val / 50) * 16.666;
+  } else if (val <= 100) {
+    return 16.666 + ((val - 50) / 50) * 16.666;
+  } else if (val <= 150) {
+    return 33.333 + ((val - 100) / 50) * 16.666;
+  } else if (val <= 200) {
+    return 50.0 + ((val - 150) / 50) * 16.666;
+  } else if (val <= 300) {
+    return 66.666 + ((val - 200) / 100) * 16.666;
+  } else {
+    return 83.333 + ((val - 300) / 200) * 16.666;
+  }
+}
+
 export const getAQIDetails = (aqiValue) => {
   const num = Math.round(Number(aqiValue) || 0);
   if (num <= 50) return { ...AQI_LEVELS.GOOD, value: num };

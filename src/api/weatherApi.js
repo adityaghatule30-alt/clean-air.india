@@ -19,7 +19,7 @@ export const fetchWeatherData = async (lat, lon, forceRefresh = false) => {
   }
 
   try {
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&past_days=1&timezone=auto`;
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,precipitation,uv_index&hourly=temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m,precipitation,uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,uv_index_max&past_days=1&timezone=auto`;
     
     const response = await fetch(url);
     if (!response.ok) {
@@ -69,6 +69,17 @@ export const fetchWeatherData = async (lat, lon, forceRefresh = false) => {
     const todayMax = daily.temperature_2m_max?.[1] != null ? Math.round(daily.temperature_2m_max[1]) : (daily.temperature_2m_max?.[0] != null ? Math.round(daily.temperature_2m_max[0]) : Math.round(current.temperature_2m ?? 28));
     const todayMin = daily.temperature_2m_min?.[1] != null ? Math.round(daily.temperature_2m_min[1]) : (daily.temperature_2m_min?.[0] != null ? Math.round(daily.temperature_2m_min[0]) : Math.round(current.temperature_2m ?? 24));
     
+    // Calculate yesterday averages from first 24 hours of hourly data (past_days=1)
+    let yesterdayAvgHumidity = null;
+    let yesterdayAvgWind = null;
+    if (hourly.relative_humidity_2m && hourly.relative_humidity_2m.length >= 24) {
+      const hSlice = hourly.relative_humidity_2m.slice(0, 24).filter(v => v != null);
+      if (hSlice.length > 0) yesterdayAvgHumidity = Math.round(hSlice.reduce((a, b) => a + b, 0) / hSlice.length);
+    }
+    if (hourly.wind_speed_10m && hourly.wind_speed_10m.length >= 24) {
+      const wSlice = hourly.wind_speed_10m.slice(0, 24).filter(v => v != null);
+      if (wSlice.length > 0) yesterdayAvgWind = Math.round(wSlice.reduce((a, b) => a + b, 0) / wSlice.length);
+    }
     const tempDiffFromYesterdayMax = yesterdayMax != null ? (todayMax - yesterdayMax) : null;
 
     const result = {
@@ -78,11 +89,15 @@ export const fetchWeatherData = async (lat, lon, forceRefresh = false) => {
         humidity: Math.round(current.relative_humidity_2m ?? 60),
         windSpeed: Math.round(current.wind_speed_10m ?? 12),
         weatherCode: current.weather_code ?? 0,
+        precipitation: Number(current.precipitation ?? 0),
+        uvIndex: Number(current.uv_index != null ? current.uv_index.toFixed(1) : 0),
         time: current.time || new Date().toISOString(),
         todayMax,
         todayMin,
         yesterdayMax,
         yesterdayMin,
+        yesterdayAvgHumidity,
+        yesterdayAvgWind,
         tempDiffFromYesterdayMax
       },
       forecast24h: next24Hours,

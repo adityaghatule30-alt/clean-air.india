@@ -133,8 +133,9 @@ export default function AtmosphereHero({
                 <Flame className="w-3.5 h-3.5 text-amber-600" />
                 <span>QUICK ACTIONS</span>
               </span>
-              <span className="text-[10px] text-amber-700 font-black bg-amber-100 px-2 py-0.5 rounded-full">
-                Interactive 🎮
+              <span className="text-[10px] font-black uppercase tracking-wider text-amber-950 bg-gradient-to-r from-amber-300 via-amber-400 to-orange-400 px-2.5 py-0.5 rounded-full shadow-glow-amber border border-amber-300 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-900 animate-pulse" />
+                <span>PLAY NOW</span>
               </span>
             </div>
 
@@ -173,29 +174,57 @@ export default function AtmosphereHero({
 
       {/* Sarcastic Daily Prediction Popup */}
       {isFortuneOpen && fortune && (
-        <div className="p-4 sm:p-5 bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 text-white rounded-3xl shadow-soft-xl border border-indigo-500/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
-          <div className="space-y-1">
+        <div className="p-5 sm:p-6 bg-gradient-to-r from-indigo-950 via-slate-900 to-slate-950 text-white rounded-3xl shadow-soft-xl border border-indigo-500/40 space-y-3 animate-fadeIn">
+          
+          <div className="flex items-center justify-between gap-3 border-b border-indigo-500/20 pb-3">
             <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-indigo-300">
-              <span>🔮 TODAY'S SARCASTIC ATMOSPHERIC FORTUNE</span>
-              <span>•</span>
-              <span className="text-amber-400">{currentCity?.name || 'Local'} Forecast</span>
+              <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+              <span>TODAY'S ATMOSPHERIC PROPHECY & LOADOUT</span>
+              <span className="hidden sm:inline">•</span>
+              <span className="text-amber-400 hidden sm:inline">{currentCity?.name || 'Local'} Forecast</span>
             </div>
-            <p className="text-base sm:text-lg font-display font-black text-amber-200">
-              "{fortune.prediction}"
-            </p>
-            <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-300 pt-1">
-              <span>Lucky Item: <strong className="text-white">{fortune.luckyCondition}</strong></span>
-              <span>•</span>
-              <span>Cosmic Tip: <strong className="text-rose-300">{fortune.cosmicWarning}</strong></span>
+
+            <button
+              onClick={() => setIsFortuneOpen(false)}
+              className="btn-press bg-white/10 hover:bg-white/20 text-white px-3 py-1 rounded-xl text-xs font-black shrink-0 cursor-pointer"
+            >
+              Dismiss ✖
+            </button>
+          </div>
+
+          <p className="text-base sm:text-lg font-display font-black text-amber-300 leading-snug">
+            "{fortune.prediction}"
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1 text-xs">
+            {/* Special Item */}
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between">
+              <span className="text-[10px] font-black uppercase text-amber-400 tracking-wider">🎒 SPECIAL ITEM</span>
+              <div className="my-1">
+                <strong className="text-white font-extrabold text-xs block">{fortune.specialItem}</strong>
+                <span className="text-[10px] text-slate-400 leading-tight block">{fortune.itemDescription}</span>
+              </div>
+            </div>
+
+            {/* Atmospheric Buff */}
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between">
+              <span className="text-[10px] font-black uppercase text-emerald-400 tracking-wider">⚡ PASSIVE BUFF</span>
+              <strong className="text-emerald-200 font-bold text-xs my-1 block">{fortune.atmosphericBuff}</strong>
+            </div>
+
+            {/* Daily Side Quest */}
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between">
+              <span className="text-[10px] font-black uppercase text-indigo-400 tracking-wider">🎯 DAILY SIDE QUEST</span>
+              <span className="text-indigo-200 font-semibold text-xs my-1 block">{fortune.sideQuest}</span>
+            </div>
+
+            {/* Cosmic Tip */}
+            <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-between">
+              <span className="text-[10px] font-black uppercase text-rose-400 tracking-wider">💡 SURVIVAL TIP</span>
+              <span className="text-rose-200 font-semibold text-xs my-1 block">{fortune.cosmicWarning}</span>
             </div>
           </div>
 
-          <button
-            onClick={() => setIsFortuneOpen(false)}
-            className="btn-press bg-white/10 hover:bg-white/20 text-white px-3.5 py-1.5 rounded-xl text-xs font-black shrink-0 self-end sm:self-center cursor-pointer"
-          >
-            Dismiss ✖
-          </button>
         </div>
       )}
 

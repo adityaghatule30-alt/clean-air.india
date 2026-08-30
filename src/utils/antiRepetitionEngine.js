@@ -74,11 +74,13 @@ class AntiRepetitionEngine {
     // 1. Filter out recently used items
     let eligible = normalized.filter(item => !this.history.includes(item.id));
 
-    // 2. If eligible pool is empty or too small, prune this category from history
+    // 2. If eligible pool is empty, prune category while preserving last picked item to prevent consecutive repeats
     if (eligible.length === 0) {
+      const lastId = this.history[this.history.length - 1];
       const categoryIds = new Set(normalized.map(i => i.id));
       this.history = this.history.filter(id => !categoryIds.has(id));
-      eligible = normalized;
+      eligible = normalized.filter(i => i.id !== lastId);
+      if (eligible.length === 0) eligible = normalized;
     }
 
     // 3. Weighted Random Selection
